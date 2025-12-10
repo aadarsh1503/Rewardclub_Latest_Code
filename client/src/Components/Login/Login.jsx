@@ -32,7 +32,7 @@ export default function LoginPage() {
   const isModal = location.state?.background;
 
   // Configuration
-  const API_BASE = "http://localhost:8005/api/admin"; 
+  const API_BASE = "/api/admin"; 
 
   // --- 1. DETECT EMAIL LINK (Reset Password Mode) ---
   useEffect(() => {
