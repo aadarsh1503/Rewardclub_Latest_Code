@@ -1,0 +1,36 @@
+/* Custom styles for the dots inside the image */
+.slick-dots {
+    position: absolute;
+    bottom: 15px;  /* Position dots at the bottom */
+    left: 50%;
+    transform: translateX(-50%);  /* Center the dots horizontally */
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+  
+  .slick-dots li {
+    margin: 0 5px;  /* Space between dots */
+  }
+  
+  .custom-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #D1D5DB;  /* Gray color for unselected dots */
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.3s ease; /* Smooth transition */
+  }
+  
+  /* Change color for the selected dot */
+  .slick-dots .slick-active .custom-dot {
+    background-color: black;  /* Black color for the selected dot */
+  }
+  
+  /* Optional: Styling for slick-prev/next buttons */
+  .slick-prev, .slick-next {
+    color: black;
+    z-index: 20;
+  }
+  

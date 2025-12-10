@@ -1,0 +1,9 @@
+/* styles.css */
+.cursor-pointer {
+    cursor: pointer;
+  }
+  
+  .cursor-pointer:hover {
+    color: #000000; /* Change to any color you want */
+  }
+  
