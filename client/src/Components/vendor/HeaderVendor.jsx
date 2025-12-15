@@ -1,14 +1,38 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '/src/App.css'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { clearData } from '../../utils/clearData';
+import LogoutConfirmDialog from '../Modal/LogoutConfirmDialog';
 
 
 function HeaderVendor({ selected, setSelected }) {
+  const navigate = useNavigate();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  // Show logout confirmation dialog
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  // Confirm logout
+  const handleLogoutConfirm = () => {
+    clearData();          // Clear token / storage
+    setSelected('');      // Optional: reset selection
+    setShowLogoutDialog(false);
+    navigate('/login');        // 🔥 Redirect to homepage
+  };
+
+  // Cancel logout
+  const handleLogoutCancel = () => {
+    setShowLogoutDialog(false);
+  };
+
   return (
+    <>
     <div className='header-view'>
         <div className='header-view-inside'> 
             <div className='div-items-view'>
@@ -56,7 +80,7 @@ function HeaderVendor({ selected, setSelected }) {
                 
            <div className='div-setings'>
                          <div className={selected === 'logout' ? 'div-setings-selected' : 'div-setings-non'}
-                       onClick={() => clearData()}>
+                       onClick={handleLogoutClick}>
                            <FontAwesomeIcon icon={faGear} style={{ color: "black" }} />
                            <span style={{ color: "black", marginLeft: 4, fontWeight: "bold" }} >Logout</span>
                          </div>
@@ -77,6 +101,14 @@ function HeaderVendor({ selected, setSelected }) {
             </div>
         </div>
     </div>
+
+    {/* Logout Confirmation Dialog */}
+    <LogoutConfirmDialog
+      isOpen={showLogoutDialog}
+      onConfirm={handleLogoutConfirm}
+      onCancel={handleLogoutCancel}
+    />
+  </>
   )
 }
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '/src/App.css'
 
@@ -11,18 +11,32 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { clearData } from '../../utils/clearData';
+import LogoutConfirmDialog from '../Modal/LogoutConfirmDialog';
 
 function HeaderAdmin({ selected, setSelected }) {
   const navigate = useNavigate();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  // ✅ Proper logout handler
-  const handleLogout = () => {
+  // Show logout confirmation dialog
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  // Confirm logout
+  const handleLogoutConfirm = () => {
     clearData();          // Clear token / storage
     setSelected('');      // Optional: reset selection
+    setShowLogoutDialog(false);
     navigate('/');        // 🔥 Redirect to homepage
   };
 
+  // Cancel logout
+  const handleLogoutCancel = () => {
+    setShowLogoutDialog(false);
+  };
+
   return (
+    <>
     <div className="header-view">
       <div className="header-view-inside">
 
@@ -102,7 +116,7 @@ function HeaderAdmin({ selected, setSelected }) {
         <div className="div-profile">
           <div
             className={selected === 'logout' ? 'div-profile-selected' : ''}
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
             title="Logout"
           >
             <FontAwesomeIcon icon={faRightFromBracket} />
@@ -133,6 +147,14 @@ function HeaderAdmin({ selected, setSelected }) {
 
       </div>
     </div>
+
+    {/* Logout Confirmation Dialog */}
+    <LogoutConfirmDialog
+      isOpen={showLogoutDialog}
+      onConfirm={handleLogoutConfirm}
+      onCancel={handleLogoutCancel}
+    />
+  </>
   )
 }
 

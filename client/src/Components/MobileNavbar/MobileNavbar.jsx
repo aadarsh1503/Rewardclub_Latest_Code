@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaTimes } from 'react-icons/fa';
 import { useTranslation } from "react-i18next"; // Import useTranslation
+import { useLocation } from "react-router-dom";
+import { getAuthToken, getUserType } from "../../utils/auth";
 import LanguageToggle from "../../LanguageToggle";
 import { Helmet } from "react-helmet";
 
@@ -10,8 +12,39 @@ import i24 from "./i24.png"; // RTL image
 const MobileNavbar = () => {
   const { t, i18n } = useTranslation(); // Get translation function & i18n instance
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userType, setUserType] = useState(null);
+  const location = useLocation();
 
   const isRTL = i18n.dir() === "rtl"; // Check if language is RTL
+
+  // Check authentication status
+  useEffect(() => {
+    const token = getAuthToken();
+    const type = getUserType();
+    setIsLoggedIn(!!token);
+    setUserType(type ? parseInt(type) : null);
+  }, [location.pathname]); // Re-check when route changes
+
+  // Get dashboard route based on user type
+  const getDashboardRoute = () => {
+    switch (userType) {
+      case 1: return "/admin-dashboard";
+      case 2: return "/member-dashboard";
+      case 3: return "/vendor-dashboard";
+      default: return "/";
+    }
+  };
+
+  // Get dashboard label based on user type
+  const getDashboardLabel = () => {
+    switch (userType) {
+      case 1: return t("Admin Dashboard") || "Admin Dashboard";
+      case 2: return t("Member Dashboard") || "Member Dashboard";
+      case 3: return t("Vendor Dashboard") || "Vendor Dashboard";
+      default: return t("Dashboard") || "Dashboard";
+    }
+  };
 
   return (
     <div className="bg-Green shadow-md font-Poppins  flex items-center justify-between px-4 py-3 md:hidden lg:hidden">
@@ -57,22 +90,34 @@ const MobileNavbar = () => {
             {t("Get Support")}
           </a>
           <div>
-        <a href="/login" target="_blank">
-        <button className="px-4 py-2  rounded-md font-semibold outline cursor-pointer text-white outline-white hover:bg-white hover:text-black">
-          {t("Login")}
-        </button>
-        </a>
-        <a href="/member-register" target="_blank">
-        <button className="px-4 py-2 mr-4 ml-4 rounded-md font-semibold outline cursor-pointer text-white outline-white hover:bg-white hover:text-black">
-          {t("Signup")}
-        </button>
-        </a>
-        <a href="/vendor-register" target="_blank">
-        <button className="px-4 py-2 mt-4 rounded-md font-semibold outline cursor-pointer text-white outline-white hover:bg-white hover:text-black">
-          {t("Vendor_Register")}
-        </button>
-        </a>
-      </div>
+            {isLoggedIn ? (
+              /* User is logged in - Show Dashboard Button */
+              <a href={getDashboardRoute()}>
+                <button className="px-4 py-2 rounded-md font-semibold outline cursor-pointer text-white outline-white hover:bg-white hover:text-black">
+                  {getDashboardLabel()}
+                </button>
+              </a>
+            ) : (
+              /* User is not logged in - Show Login/Register Buttons */
+              <>
+                <a href="/login" target="_blank">
+                  <button className="px-4 py-2 rounded-md font-semibold outline cursor-pointer text-white outline-white hover:bg-white hover:text-black">
+                    {t("Login")}
+                  </button>
+                </a>
+                <a href="/member-register" target="_blank">
+                  <button className="px-4 py-2 mr-4 ml-4 rounded-md font-semibold outline cursor-pointer text-white outline-white hover:bg-white hover:text-black">
+                    {t("Signup")}
+                  </button>
+                </a>
+                <a href="/vendor-register" target="_blank">
+                  <button className="px-4 py-2 mt-4 rounded-md font-semibold outline cursor-pointer text-white outline-white hover:bg-white hover:text-black">
+                    {t("Vendor_Register")}
+                  </button>
+                </a>
+              </>
+            )}
+          </div>
           <LanguageToggle />
         </nav>
       </div>

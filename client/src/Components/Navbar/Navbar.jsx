@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom"; 
 import LanguageToggle from "../../LanguageToggle";
 import { useTranslation } from "react-i18next";
+import { getAuthToken, getUserType } from "../../utils/auth";
 import i22 from "./i22.png";
 import i24 from "./i24.png";
 
@@ -10,6 +11,8 @@ const Navbar = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userType, setUserType] = useState(null);
   
   const location = useLocation();
   
@@ -20,6 +23,14 @@ const Navbar = () => {
 
   const [isRTL, setIsRTL] = useState(i18n.language === 'ar');
   const isHomePage = location.pathname === "/";
+
+  // Check authentication status
+  useEffect(() => {
+    const token = getAuthToken();
+    const type = getUserType();
+    setIsLoggedIn(!!token);
+    setUserType(type ? parseInt(type) : null);
+  }, [location.pathname]); // Re-check when route changes
 
   useEffect(() => {
     setIsRTL(i18n.language === 'ar');
@@ -56,6 +67,26 @@ const Navbar = () => {
     { href: "/offers-rewards", label: t("Unlock Rewards") },
     { href: "/contact-us", label: t("Get Support") },
   ];
+
+  // Get dashboard route based on user type
+  const getDashboardRoute = () => {
+    switch (userType) {
+      case 1: return "/admin-dashboard";
+      case 2: return "/member-dashboard";
+      case 3: return "/vendor-dashboard";
+      default: return "/";
+    }
+  };
+
+  // Get dashboard label based on user type
+  const getDashboardLabel = () => {
+    switch (userType) {
+      case 1: return t("Admin Dashboard") || "Admin Dashboard";
+      case 2: return t("Member Dashboard") || "Member Dashboard";
+      case 3: return t("Vendor Dashboard") || "Vendor Dashboard";
+      default: return t("Dashboard") || "Dashboard";
+    }
+  };
 
   return (
     <nav
@@ -115,59 +146,80 @@ const Navbar = () => {
       {/* ---------------- RIGHT: BUTTONS & TOGGLE ---------------- */}
       <div className={`hidden lg:flex items-center flex-nowrap ${isAtTop ? 'gap-4' : 'gap-2 xl:gap-4'}`}>
         
-        {/* 1. Login Button */}
-        <Link 
-          to="/login" 
-          state={{ background: background }} // Corrected here
-          replace={!!location.state?.background} // Replace history if switching between modals
-        >
-          <button className={`
-            font-semibold cursor-pointer whitespace-nowrap transition-all duration-300
-            ${isAtTop 
-              ? "px-5 py-2 rounded-md border-2 border-white text-white hover:bg-white hover:text-black text-sm xl:text-base" 
-              : "px-3 xl:px-5 py-1.5 xl:py-2 rounded-full border border-white/50 text-white hover:bg-white/20 hover:backdrop-blur-md hover:border-white text-xs xl:text-sm"
-            }
-          `}>
-            {t("Login")}
-          </button>
-        </Link>
+        {isLoggedIn ? (
+          /* User is logged in - Show Dashboard Button */
+          <Link to={getDashboardRoute()}>
+            <button className={`
+              font-semibold cursor-pointer whitespace-nowrap transition-all duration-300
+              ${isAtTop 
+                ? "px-5 py-2.5 rounded-md bg-white text-black hover:bg-gray-100 border-2 border-white text-sm xl:text-base"
+                : "relative overflow-hidden px-4 xl:px-6 py-1.5 xl:py-2.5 rounded-full bg-white text-black shadow-lg hover:scale-105 text-xs xl:text-sm"
+              }
+            `}>
+              <span className="relative z-10">{getDashboardLabel()}</span>
+              {!isAtTop && (
+                 <div className="absolute inset-0 -translate-x-full hover:animate-[shimmer_1s_infinite] bg-gradient-to-r from-transparent via-gray-200 to-transparent z-0 w-full h-full"></div>
+              )}
+            </button>
+          </Link>
+        ) : (
+          /* User is not logged in - Show Login/Register Buttons */
+          <>
+            {/* 1. Login Button */}
+            <Link 
+              to="/login" 
+              state={{ background: background }}
+              replace={!!location.state?.background}
+            >
+              <button className={`
+                font-semibold cursor-pointer whitespace-nowrap transition-all duration-300
+                ${isAtTop 
+                  ? "px-5 py-2 rounded-md border-2 border-white text-white hover:bg-white hover:text-black text-sm xl:text-base" 
+                  : "px-3 xl:px-5 py-1.5 xl:py-2 rounded-full border border-white/50 text-white hover:bg-white/20 hover:backdrop-blur-md hover:border-white text-xs xl:text-sm"
+                }
+              `}>
+                {t("Login")}
+              </button>
+            </Link>
 
-        {/* 2. Signup Button */}
-        <Link 
-          to="/member-register" 
-          state={{ background: background }} // Corrected here
-          replace={!!location.state?.background} // Replace history if switching between modals
-        >
-          <button className={`
-            font-semibold cursor-pointer whitespace-nowrap transition-all duration-300
-            ${isAtTop 
-              ? "px-5 py-2.5 rounded-md bg-white text-black hover:bg-gray-100 border-2 border-white text-sm xl:text-base"
-              : "relative overflow-hidden px-4 xl:px-6 py-1.5 xl:py-2.5 rounded-full bg-white text-black shadow-lg hover:scale-105 text-xs xl:text-sm"
-            }
-          `}>
-            <span className="relative z-10">{t("Signup")}</span>
-            {!isAtTop && (
-               <div className="absolute inset-0 -translate-x-full hover:animate-[shimmer_1s_infinite] bg-gradient-to-r from-transparent via-gray-200 to-transparent z-0 w-full h-full"></div>
-            )}
-          </button>
-        </Link>
+            {/* 2. Signup Button */}
+            <Link 
+              to="/member-register" 
+              state={{ background: background }}
+              replace={!!location.state?.background}
+            >
+              <button className={`
+                font-semibold cursor-pointer whitespace-nowrap transition-all duration-300
+                ${isAtTop 
+                  ? "px-5 py-2.5 rounded-md bg-white text-black hover:bg-gray-100 border-2 border-white text-sm xl:text-base"
+                  : "relative overflow-hidden px-4 xl:px-6 py-1.5 xl:py-2.5 rounded-full bg-white text-black shadow-lg hover:scale-105 text-xs xl:text-sm"
+                }
+              `}>
+                <span className="relative z-10">{t("Signup")}</span>
+                {!isAtTop && (
+                   <div className="absolute inset-0 -translate-x-full hover:animate-[shimmer_1s_infinite] bg-gradient-to-r from-transparent via-gray-200 to-transparent z-0 w-full h-full"></div>
+                )}
+              </button>
+            </Link>
 
-        {/* 3. Vendor Register */}
-        <Link 
-          to="/vendor-register" 
-          state={{ background: background }} // Corrected here
-          replace={!!location.state?.background} // Replace history if switching between modals
-        >
-          <button className={`
-            font-semibold cursor-pointer whitespace-nowrap transition-all duration-300
-            ${isAtTop 
-              ? "px-5 py-2 rounded-md border-2 border-white text-white hover:bg-white hover:text-black text-sm xl:text-base" 
-              : "px-3 xl:px-5 py-1.5 xl:py-2 rounded-full border border-white/50 text-white hover:bg-white/20 hover:backdrop-blur-md hover:border-white text-xs xl:text-sm"
-            }
-          `}>
-            {t("Vendor_Register")}
-          </button>
-        </Link>
+            {/* 3. Vendor Register */}
+            <Link 
+              to="/vendor-register" 
+              state={{ background: background }}
+              replace={!!location.state?.background}
+            >
+              <button className={`
+                font-semibold cursor-pointer whitespace-nowrap transition-all duration-300
+                ${isAtTop 
+                  ? "px-5 py-2 rounded-md border-2 border-white text-white hover:bg-white hover:text-black text-sm xl:text-base" 
+                  : "px-3 xl:px-5 py-1.5 xl:py-2 rounded-full border border-white/50 text-white hover:bg-white/20 hover:backdrop-blur-md hover:border-white text-xs xl:text-sm"
+                }
+              `}>
+                {t("Vendor_Register")}
+              </button>
+            </Link>
+          </>
+        )}
 
         {/* 4. LANGUAGE TOGGLE */}
         <div className="flex items-center shrink-0">

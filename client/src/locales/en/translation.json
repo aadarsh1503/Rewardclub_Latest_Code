@@ -396,7 +396,11 @@
   "terms_vendor": "Terms and Conditions May Apply is a documentary that addresses how corporations and the government utilize the information that users provide when agreeing to browse a website, install an application.",
   "register": "REGISTER",
   "Point_A": "Point A",
-"Point_B": "Point B"
+"Point_B": "Point B",
+"Admin Dashboard": "Admin Dashboard",
+"Member Dashboard": "Member Dashboard", 
+"Vendor Dashboard": "Vendor Dashboard",
+"Dashboard": "Dashboard"
         
       
       
